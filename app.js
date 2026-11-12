@@ -1,6 +1,9 @@
 const WORKER_BASE  = "__WORKER_BASE__";
 const AUTH_PATH    = "/auth-p7/app/default/AuthApi4.php?a=aLoginPwd";
 const BASE_API     = "/rest/w1";
+// true se il build non ha sostituito il placeholder (WORKER_BASE non configurata)
+const WORKER_MISSING = !/^https?:\/\//.test(WORKER_BASE);
+const WORKER_MISSING_MSG = "servizio non configurato: imposta la variabile WORKER_BASE su Netlify e rifai il deploy";
 const GRADES_YEAR  = 26; // da aggiornare ogni anno scolastico, penso
 
 const state = {
@@ -10,6 +13,7 @@ const state = {
 };
 
 async function cvFetch(path, opts = {}) {
+  if (WORKER_MISSING) throw new Error(WORKER_MISSING_MSG);
   const url = `${WORKER_BASE}/proxy?path=${encodeURIComponent(path)}`;
   const headers = { ...(opts.headers || {}) };
 
@@ -33,6 +37,7 @@ async function cvJSON(path, opts = {}) {
 }
 
 async function login(uid, pwd) {
+  if (WORKER_MISSING) throw new Error(WORKER_MISSING_MSG);
   const params = new URLSearchParams({ cid: "", uid, pwd, pin: "", target: "" });
 
   const res = await fetch(`${WORKER_BASE}/login`, {
